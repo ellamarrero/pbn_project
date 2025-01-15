@@ -11,7 +11,7 @@ from itertools import combinations, product, chain
 
 
 def load_crayola_colors(cbox = 96):
-    crayola_box = pd.read_csv('/Users/ellamarrero/code/image_process/crayola_colors.csv')
+    crayola_box = pd.read_csv('crayola_colors.csv')
     box = crayola_box[['name','r','g','b']][crayola_box[f'box{cbox}'] =='Yes'] 
     box ['srgb'] = list(zip(box['r']/255, box['g']/255, box['b']/255)) # create one rgb value for conversion
     rgb = box['srgb'] # create np array of colors
