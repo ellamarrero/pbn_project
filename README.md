@@ -6,13 +6,19 @@ This project was completed by Ella Marrero, with the generous help of skimage do
 As an example, it takes an image (like that of my family's kittens): 
 
 Segements it using simple linear iterative clustering (SLIC), and averages regions using region adjacency graph thresholding (RAG):
-![Original image of Tig](https://github.com/ellamarrero/pbn_project/blob/main/data/tig.jpeg "Tig (Original Image)")
+<p align="left">
+  <img src="https://github.com/ellamarrero/pbn_project/blob/main/data/tig.jpeg" alt="Tig (Original Image)"width="200"/>
+</p>
 
 Then replaces the colors with the closest match from a given Crayola crayon box number:
 **Note that this may change the overall color scheme from warm to cool or match two different colors to one similar crayon color, reducing the overall number of colors in the final image**
-![Segmented image of Tig](https://github.com/ellamarrero/pbn_project/blob/main/output/Tig_pre_crayon.jpeg "Tig (Processed Image)")
+<p align="left">
+  <img src="https://github.com/ellamarrero/pbn_project/blob/main/output/Tig_pre_crayon.jpeg" alt="Tig (Processed Image)" width="200"/>
+</p>
 
 
 And finally, it creates an outline of the image with the segments matched to their closest Crayola crayon: 
-![Crayon image of Tig](https://github.com/ellamarrero/pbn_project/blob/main/output/Tig_pre_crayon.jpeg "Tig (Crayon PBN Image)")
+<p align="left">
+  <img src="https://github.com/ellamarrero/pbn_project/blob/main/output/Tig_pre_crayon.jpeg" alt="Tig (Crayon PBN Image)" width="200"/>
+</p>
 
