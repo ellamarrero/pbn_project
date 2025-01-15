@@ -159,6 +159,7 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
 
     if no_crayon: 
         plt.imshow(img_seg) # show potential results, save for ref
+        plt.axis('off')
         plt.savefig(f'{outpath}/{name}_pre_crayon.jpeg', bbox_inches='tight')
         plt.close() 
 
@@ -171,6 +172,7 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
     print("replacing image colors with matches...\n")
     img_crayon = replace_img_colors(img_seg, img_match_colors)
     plt.imshow(img_crayon) # show potential results, save for ref
+    plt.axis('off')
     plt.savefig(f'{outpath}/{name}_result.jpeg', bbox_inches='tight')
     plt.close() 
 
