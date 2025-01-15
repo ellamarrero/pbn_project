@@ -1,5 +1,5 @@
 # import necessary libraries
-# import necessary libraries
+import os # to get working directory
 import matplotlib.pyplot as plt
 import numpy as np
 import skimage as ski
@@ -148,13 +148,19 @@ def save_pbn_image(outpath, name, final_img, key, nbox):
     plt.close() 
 
 
-def create_pbn(img_path, name, outpath, crayon_box = 96):
+def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
     # read in image
     img = iio.imread(img_path)
 
     # given image, segment using SLIC and RAG
     print("segmenting image...\n")
     img_seg, img_labels = segment_image(img)
+    # save version of image with no crayon color correction 
+
+    if no_crayon: 
+        plt.imshow(img_seg) # show potential results, save for ref
+        plt.savefig(f'{outpath}/{name}_pre_crayon.jpeg', bbox_inches='tight')
+        plt.close() 
 
     # color identification (in segmented image), match to closest crayon color
     print("matching image colors...\n")
