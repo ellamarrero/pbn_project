@@ -1,0 +1,108 @@
+color,name,hex_web,r,g,b,box84,box64,box96,box120
+,Bluetiful,#3C69E7,60,105,231,Yes,Yes,Yes,Yes
+,Red,#ED0A3F,237,10,63,Yes,Yes,Yes,Yes
+,Maroon,#C32148,195,33,72,No,No,Yes,Yes
+,Scarlet,#FD0E35,253,14,53,Yes,Yes,Yes,Yes
+,Brick Red,#C62D42,198,45,66,No,Yes,Yes,Yes
+,Chestnut,#B94E48,185,78,72,Yes,Yes,Yes,Yes
+,Sunset Orange,#FE4C40,254,76,64,No,No,No,Yes
+,Bittersweet,#FE6F5E,254,111,94,No,Yes,Yes,Yes
+,Vivid Tangerine,#FF9980,255,153,128,No,No,Yes,Yes
+,Burnt Orange,#FF7034,255,112,52,No,Yes,Yes,Yes
+,Red-Orange,#FF3F34,255,63,52,Yes,Yes,Yes,Yes
+,Orange,#FF8833,255,136,51,Yes,Yes,Yes,Yes
+,Macaroni and Cheese,#FFB97B,255,185,123,No,Yes,Yes,Yes
+,Mango Tango,#E77200,231,114,0,No,No,Yes,Yes
+,Yellow-Orange,#FFAE42,255,174,66,Yes,Yes,Yes,Yes
+,Banana Mania,#FBE7B2,251,231,178,No,No,No,Yes
+,Goldenrod,#FCD667,252,214,103,No,Yes,Yes,Yes
+,Dandelion,#FED85D,254,216,93,Yes,Yes,Yes,Yes
+,Yellow,#FBE870,251,232,112,Yes,Yes,Yes,Yes
+,Green-Yellow,#F1E788,241,231,136,Yes,Yes,Yes,Yes
+,Olive Green,#B5B35C,181,179,92,No,Yes,Yes,Yes
+,Spring Green,#ECEBBD,236,235,189,No,Yes,Yes,Yes
+,Canary,#FFFF99,255,255,153,No,No,No,Yes
+,Inchworm,#B0E313,176,227,19,No,No,Yes,Yes
+,Yellow-Green,#C5E17A,197,225,122,Yes,Yes,Yes,Yes
+,Asparagus,#7BA05B,123,160,91,No,Yes,Yes,Yes
+,Granny Smith Apple,#9DE093,157,224,147,No,Yes,Yes,Yes
+,Fern,#63B76C,99,183,108,No,No,No,Yes
+,Green,#01A638,1,166,56,Yes,Yes,Yes,Yes
+,Forest Green,#5FA777,95,167,119,No,Yes,Yes,Yes
+,Sea Green,#93DFB8,147,223,184,No,Yes,Yes,Yes
+,Shamrock,#33CC99,51,204,153,No,No,Yes,Yes
+,Mountain Meadow,#1AB385,26,179,133,No,No,No,Yes
+,Jungle Green,#29AB87,41,171,135,No,No,Yes,Yes
+,Caribbean Green,#00CC99,0,204,153,No,No,No,Yes
+,Tropical Rain Forest,#00755E,0,117,94,No,No,Yes,Yes
+,Pine Green,#01796F,1,121,111,No,No,Yes,Yes
+,Robin's Egg Blue,#00CCCC,0,204,204,No,Yes,Yes,Yes
+,Aquamarine,#95E0E8,69,139,116,No,No,Yes,Yes
+,Turquoise Blue,#6CDAE7,108,218,231,No,Yes,Yes,Yes
+,Outer Space,#2D383A,45,56,58,No,No,Yes,Yes
+,Sky Blue,#76D7EA,118,215,234,Yes,Yes,Yes,Yes
+,Blue-Green,#0095B7,0,149,183,Yes,Yes,Yes,Yes
+,Pacific Blue,#009DC4,0,157,196,No,Yes,Yes,Yes
+,Cerulean,#02A4D3,2,164,211,Yes,Yes,Yes,Yes
+,Cornflower,#93CCEA,147,204,234,No,Yes,Yes,Yes
+,Midnight Blue,#003366,0,51,102,No,No,Yes,Yes
+,Navy Blue,#0066CC,0,102,204,No,No,Yes,Yes
+,Denim,#1560BD,21,96,189,No,No,Yes,Yes
+,Blue (III),#0066FF,0,102,255,Yes,Yes,Yes,Yes
+,Cadet Blue,#A9B2C3,169,178,195,Yes,Yes,Yes,Yes
+,Periwinkle,#C3CDE6,195,205,230,No,Yes,Yes,Yes
+,Wild Blue Yonder,#7A89B8,122,137,184,No,No,Yes,Yes
+,Indigo,#4F69C6,79,105,198,Yes,Yes,Yes,Yes
+,Manatee,#8D90A1,141,144,161,No,No,No,Yes
+,Blue Bell,#9999CC,153,153,204,No,No,No,Yes
+,Blue-Violet,#6456B7,100,86,183,Yes,Yes,Yes,Yes
+,Purple Heart,#652DC1,101,45,193,No,No,No,Yes
+,Royal Purple,#6B3FA0,107,63,160,No,No,Yes,Yes
+,Violet (II),#8359A3,131,89,163,Yes,Yes,Yes,Yes
+,Wisteria,#C9A0DC,201,160,220,Yes,Yes,Yes,Yes
+,Vivid Violet,#803790,128,55,144,No,No,No,Yes
+,Purple Mountains' Majesty,#D6AEDD,214,174,221,No,Yes,Yes,Yes
+,Fuchsia,#C154C1,193,84,193,No,No,Yes,Yes
+,Pink Flamingo,#FC74FD,242,116,253,No,No,No,Yes
+,Orchid,#E29CD2,226,156,210,No,Yes,Yes,Yes
+,Plum,#843179,132,49,121,No,Yes,Yes,Yes
+,Red-Violet,#BB3385,187,51,133,Yes,Yes,Yes,Yes
+,Jazzberry Jam,#A50B5E,165,11,94,No,No,Yes,Yes
+,Eggplant,#614051,97,64,81,No,No,No,Yes
+,Magenta,#F653A6,246,83,166,No,Yes,Yes,Yes
+,Cerise,#DA3287,218,50,135,No,No,Yes,Yes
+,Wild Strawberry,#FF3399,255,51,153,No,Yes,Yes,Yes
+,Lavender (II),#FBAED2,251,174,210,No,Yes,Yes,Yes
+,Cotton Candy,#FFB7D5,255,183,213,No,No,No,Yes
+,Carnation Pink,#FFA6C9,255,166,201,Yes,Yes,Yes,Yes
+,Violet-Red,#F7468A,247,70,138,Yes,Yes,Yes,Yes
+,Razzmatazz,#E30B5C,227,11,92,No,No,Yes,Yes
+,Piggy Pink,#FDD7E4,253,215,228,No,No,No,Yes
+,Blush,#DB5079,219,80,121,No,No,No,Yes
+,Tickle Me Pink,#FC80A5,252,128,165,No,Yes,Yes,Yes
+,Mauvelous,#F091A9,240,145,169,No,Yes,Yes,Yes
+,Salmon,#FF91A4,255,145,164,No,Yes,Yes,Yes
+,Mahogany,#CA3435,202,52,53,No,Yes,Yes,Yes
+,Melon,#FEBAAD,254,186,173,Yes,Yes,Yes,Yes
+,Pink Sherbert,#F7A38E,247,163,142,No,No,No,Yes
+,Burnt Sienna,#E97451,233,116,81,No,Yes,Yes,Yes
+,Brown,#AF593E,175,89,62,Yes,Yes,Yes,Yes
+,Sepia,#9E5B40,158,91,64,No,Yes,Yes,Yes
+,Fuzzy Wuzzy,#87421F,135,66,31,No,No,No,Yes
+,Beaver,#926F5B,146,111,91,No,No,No,Yes
+,Tumbleweed,#DEA681,222,166,129,No,Yes,Yes,Yes
+,Raw Sienna,#D27D46,210,125,70,No,Yes,Yes,Yes
+,Tan,#FA9D5A,250,157,90,Yes,Yes,Yes,Yes
+,Desert Sand,#EDC9AF,237,201,175,No,No,No,Yes
+,Peach,#FFCBA4,255,203,164,Yes,Yes,Yes,Yes
+,Apricot,#FDD5B1,253,213,177,Yes,Yes,Yes,Yes
+,Almond,#EED9C4,238,217,196,No,No,No,Yes
+,Shadow,#837050,131,112,80,No,No,No,Yes
+,Gold (II),#E6BE8A,230,190,138,No,Yes,Yes,Yes
+,Silver,#C9C0BB,201,192,187,No,Yes,Yes,Yes
+,Copper,#DA8A67,218,138,103,No,No,Yes,Yes
+,Antique Brass,#C88A65,200,138,101,No,No,No,Yes
+,Black,#000000,0,0,0,Yes,Yes,Yes,Yes
+,Gray,#8B8680,139,134,128,Yes,Yes,Yes,Yes
+,Timberwolf,#D9D6CF,217,214,207,Yes,Yes,Yes,Yes
+,White,#FFFFFF,255,255,255,Yes,Yes,Yes,Yes
