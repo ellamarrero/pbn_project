@@ -28,8 +28,11 @@ And finally, it creates an outline of the image with the segments matched to the
 
 Another kitten example (you'll notice that the final product is now my profile photo): 
 <p align="left">
-    <img src="https://github.com/ellamarrero/pbn_project/blob/main/data/bea.jpeg" alt="Bea (Original Image)" width="200"/>
-    <img src="https://github.com/ellamarrero/pbn_project/blob/main/output/Bea_pre_crayon.jpeg" alt="Bea (Segmented Image)" width="200"/>
-    <img src="https://github.com/ellamarrero/pbn_project/blob/main/output/bea_result.jpeg" alt="Bea (Crayon PBN Image)" width="200"/>
+    <img src="https://github.com/ellamarrero/pbn_project/blob/main/data/bea.jpeg" alt="Bea (Original Image)" width="300"  style="transform:rotate(90deg);"/>
+    <img src="https://github.com/ellamarrero/pbn_project/blob/main/output/Bea_pre_crayon.jpeg" alt="Bea (Segmented Image)" width="300"/>
+    <img src="https://github.com/ellamarrero/pbn_project/blob/main/output/Bea_result.jpeg" alt="Bea (Crayon PBN Image)" width="300"/>
+</p>
+
+<p align="left">
     <img src="https://github.com/ellamarrero/pbn_project/blob/main/output/bea.jpeg" alt="Bea ( PBN Image)" width="200"/>
 </p>
