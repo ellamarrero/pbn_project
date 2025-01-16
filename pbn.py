@@ -10,7 +10,15 @@ import pandas as pd
 from itertools import combinations, product, chain
 
 
-def load_crayola_colors(cbox = 96):
+def load_crayola_colors(cbox = 96): 
+    """
+    Loads in CSV of crayola box colors/RGB values, filters for specific num crayons
+    Note: source of CSV is wikipedia page for crayon colors 
+    Inputs:
+    - cbox (int) - number of crayons in box (16, 24, 48, 64, 96, 120)
+    Returns:
+    - tuple (pd.DataFrame, list) - dataframe with color names and RGB vlaues, list of colors cielab space colors
+    """
     crayola_box = pd.read_csv('crayola_colors.csv')
     box = crayola_box[['name','r','g','b']][crayola_box[f'box{cbox}'] =='Yes'] 
     box ['srgb'] = list(zip(box['r']/255, box['g']/255, box['b']/255)) # create one rgb value for conversion
@@ -21,7 +29,14 @@ def load_crayola_colors(cbox = 96):
 
 
 def segment_image(img): 
-    # repeat with real image 
+    """
+    Given an image, segments using simple linear iterative clustering and joins segments using region 
+    adjacent graph thresholding. 
+    Inputs:
+    - img (image) - image to be segmented 
+    Returns:
+    - tuple (segmented image, image segment labels) 
+    """
     segments_slic = ski.segmentation.slic(img, n_segments=300, compactness=20, sigma=1, start_label=1)
     img_slic = ski.color.label2rgb(segments_slic, img, kind='avg', bg_label=None) # specify background color or will average to 0
 
@@ -31,8 +46,16 @@ def segment_image(img):
 
     return img_seg, reg_labels
 
-# identify unique colors in segmented/simplified image
+
 def count_uniq_colors(img_seg): 
+    """
+    Given a segmented image (i.e. simplified), identify all unique colors in image and
+    covnert to cielab color space
+    Inputs:
+    - img (segmented image)
+    Returns:
+    - color_lst (list of unique cielab colors)
+    """
     colors_only = np.vstack(img_seg)
     colors_only_tup = list(map(tuple, colors_only)) 
     uniq_clrs = {x: colors_only_tup.count(x) for x in set(colors_only_tup)}
@@ -44,20 +67,38 @@ def count_uniq_colors(img_seg):
     return color_lst
 
 
-# helper function, gets relevant crayon names from box df 
 def get_crayon_names(crayon_matches, cbox):
+    """
+    Helper function ,gets relevant crayon names from box df 
+    (wouldn't be necessary in a better version of this code)
+    Inputs:
+    - crayon_matches (dict) - dictionary of color in image and matched cielab color
+    - cbox (int) - number of crayons in box (16, 24, 48, 64, 96, 120), default is 96
+    Returns:
+    - crayon_info (np.array) - array of colors in image and their corresponding names
+    """
+    # find RGB values of color sin image
     crayon_needs = [cbox.loc[(cbox['r'] == t[0][0]) & (cbox['g'] == t[0][1]) & (cbox['b'] == t[0][2])]['name'] for t in crayon_matches.values()]
-    crayon_needs = np.unique(crayon_needs)
-    crayon_info = cbox[cbox['name'].isin(crayon_needs)]
-    # create outline of image, label each segmenet with number, correspond numbers to color of crayola crayon
-    crayon_info['color_id'] = np.arange(crayon_info.shape[0])
+    crayon_needs = np.unique(crayon_needs) # get unique RGB list as array
+    crayon_info = cbox[cbox['name'].isin(crayon_needs)] # filter crayon info for relevant colors
+    crayon_info['color_id'] = np.arange(crayon_info.shape[0]) # Create ID numbers of crayola crayon 
 
     return crayon_info
 
 
-# get all possible matches of color and crayon color to find closest crayon match
 def match_colors(clr_lst, cbox):
+    """
+    Get all possible matches of color and crayon color to find closest match using CIE2000 
+    color distance calculation
+    Inputs:
+    - clr_lst (lst) - list of colors in image
+    - cbox (int) - number of crayons in box (16, 24, 48, 64, 96, 120), default is 96
+    Returns:
+    - color_matches_rgb (dict), crayons_needed (np.array) - dictionary matching colors to crayon colors, 
+    dictionary of crayon crayon colors neeed 
+    """
     box_df, lab = load_crayola_colors(cbox)
+    # create match of all colors in image and all crayon colors in LAB space
     color_combos_lst = list(product(clr_lst,lab)) 
     # calculate cie2000 for colors to find closest crayon color match
     color_match_lst_dict = [{"c":c[0], "m":c[1], 'cie76':ski.color.deltaE_ciede2000(c[0],c[1])} for c in color_combos_lst] # note: list of dictionaries
