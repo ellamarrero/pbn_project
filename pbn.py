@@ -52,7 +52,7 @@ def count_uniq_colors(img_seg):
     Given a segmented image (i.e. simplified), identify all unique colors in image and
     covnert to cielab color space
     Inputs:
-    - img (segmented image)
+    - img_seg (segmented image)
     Returns:
     - color_lst (list of unique cielab colors)
     """
@@ -118,6 +118,15 @@ def match_colors(clr_lst, cbox):
 
 # replace image colors with closest crayon colors 
 def replace_img_colors(img_seg, color_crayon_match):
+    """
+    Given segmented image and list of dicts matching colors in image to new color, replace colors in 
+    image with new colors. 
+    Inputs: 
+    - img_seg (segmented image)
+    - color_crayon_match: dictionary matching colors to crayon colors
+    Returns:
+    - new_img (segmented image): image with colors replaced
+    """
     new_img = img_seg.copy()
     # replace the colors! 
     # mask idea https://stackoverflow.com/questions/61808326/how-to-replace-all-rgb-values-in-an-numpy-image-arrray-based-on-an-target-pixel
@@ -132,6 +141,13 @@ def replace_img_colors(img_seg, color_crayon_match):
 
 # helper function, identifies centroid coordinates of each region
 def identify_region_centers(img_labels):
+    """
+    Given image split into regions, determine where center of each region would be.
+    Inputs:
+    - img_labels (labelled image)
+    Returns: 
+    - region-centroids (pd.DataFrame): dataframe with label and coordinates of centroid 
+    """
     region_centroids = pd.DataFrame(ski.measure.regionprops_table(img_labels,properties=['centroid']))
     # round down centroids
     region_centroids['x'] = region_centroids['centroid-0'].apply(math.floor)
@@ -141,6 +157,16 @@ def identify_region_centers(img_labels):
 
 
 def label_regions(img_crayon, img_labels, crayon_info, outpath):
+    """
+    Given a segmented image, write numbers on each region corresponding to its crayon color.
+    Inputs:
+    - img_crayon: image with crayon colors assinged to segments
+    - img_labels: image labels
+    - crayon_info: crayon colors in the image (names of crayons) 
+    - outpath: str, desired outpath for temp image
+    Returns:
+    - nothing, writes modified image to temporary file in outpath. 
+    """
     only_labels = ski.segmentation.find_boundaries(img_labels,connectivity = 1)
     only_labels = only_labels*-1
 
@@ -166,6 +192,17 @@ def label_regions(img_crayon, img_labels, crayon_info, outpath):
 
 
 def save_pbn_image(outpath, name, final_img, key, nbox):
+    """
+    Given a segmented image, write numbers on each region corresponding to its crayon color.
+    Inputs:
+    - outpath: str, desired outpath for image
+    - name: str, name of image
+    - final_img: image labeled with crayon colors
+    - key:  dataframe matching label numbers to crayon names
+    - nbox: number of crayons in box (user-supplied)
+    Returns:
+    - nothing, writes modified image to file in outpath. 
+    """
     final_img = iio.imread(f'{outpath}/temp.png')
     key = key[['color_id','name']]
 
@@ -190,6 +227,18 @@ def save_pbn_image(outpath, name, final_img, key, nbox):
 
 
 def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
+    """
+    Given the filepath to an image, and the number of crayons in crayon box, converts image to a paint-by-numbers
+    style crayon drawing.
+    Inputs:
+    - img_path: str, filepath to image
+    - name: str, name of image
+    - outpath: str, desired outpath for image
+    - crayon_box: int, number of crayons in crayola box
+    - no_crayon: bool, whether or not to save a version of segmeneted image before crayon replacement colors
+    Returns:
+    - nothing, saves final PBN project and result image for reference.
+    """
     # read in image
     img = iio.imread(img_path)
 
