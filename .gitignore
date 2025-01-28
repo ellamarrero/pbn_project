@@ -1,0 +1,21 @@
+
+# exclude all files except python and CSV files (globally)
+*
+!*.py
+!*.csv
+!*.md
+
+# Allow specific files in data for example
+!data/bea.jpeg
+!data/tig.jpeg
+
+# Allow specific files in output for example
+!output/bea.jpeg
+!output/tig.jpeg
+!output/Tig_pre_crayon.jpeg
+!output/tig_result.jpeg
+!output/Bea_pre_crayon.jpeg
+!output/Bea_result.jpeg
+
+# Ensure directories are not excluded (so we can include specific files within them)
+!*/
