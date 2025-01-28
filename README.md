@@ -1,7 +1,9 @@
 # Paint-By-Numbers (Crayon-By-Numbers)
-The goal of this project was the convert any given image to a paint-by-numbers project that can be easily executed by the user. It relies on crayola crayon boxes (the source of which crayon is in which box, and the crayons' RGB codes is [Wikipedia](https://en.wikipedia.org/wiki/List_of_Crayola_crayon_colors)). 
-
 This project was chosen as a fun way to learn image processing techniques used in processing satellite imagery and other practical contexts. It was completed with the generous help of skimage documentation, online blogs, and stackexchange to determine best practices for image processing.
+
+The goal of this project was the convert any given image to a paint-by-numbers project that can be easily executed by the user. It relies on crayola crayon boxes (the source of which crayon is in which box, and the crayons' RGB codes is [Wikipedia](https://en.wikipedia.org/wiki/List_of_Crayola_crayon_colors)). It is far from perfectly executed. If I took more time with it, I would reduce the number of times I had to iterate through the colors in an image, and reduce the number of conversions between CIELAB and RGB color spaces. I might try (again) to write a recursive process to reduce the number of colors in the image. Additionally, upon printing and coloring these images, I found that the colors didn't necessarily translate well on paper (since crayon coloring is often lighter than the darkest color and not entirely uniform). 
+
+
 
 As an example, it takes an image (like that of my family's kitten): 
 <p align="left">
