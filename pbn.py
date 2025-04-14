@@ -59,25 +59,6 @@ def get_uniq_colors(img_seg):
 
     return uniq_clrs_srgb
 
-
-def get_crayon_names(crayon_matches, cbox):
-    """
-    Helper function ,gets relevant crayon names from box df 
-    (wouldn't be necessary in a better version of this code)
-    Inputs:
-    - crayon_matches (dict) - dictionary of color in image and matched cielab color
-    - cbox (int) - number of crayons in box (16, 24, 48, 64, 96, 120), default is 96
-    Returns:
-    - crayon_info (np.array) - array of colors in image and their corresponding names
-    """
-    # find RGB values of color sin image
-    crayon_needs = [cbox.loc[(cbox['r'] == t[0][0]) & (cbox['g'] == t[0][1]) & (cbox['b'] == t[0][2])]['name'] for t in crayon_matches.values()]
-    crayon_needs = np.unique(crayon_needs) # get unique RGB list as array
-    crayon_info = cbox[cbox['name'].isin(crayon_needs)] # filter crayon info for relevant colors
-    crayon_info['color_id'] = np.arange(crayon_info.shape[0]) # Create ID numbers of crayola crayon 
-
-    return crayon_info
-
 def calc_delta_E(clr1, clr2):
     '''
     Helper function, given 2 colors calculates CIELab Delta E diff
