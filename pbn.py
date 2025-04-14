@@ -21,11 +21,8 @@ def load_crayola_colors(cbox = 96):
     """
     crayola_box = pd.read_csv('crayola_colors.csv')
     box = crayola_box[['name','r','g','b']][crayola_box[f'box{cbox}'] =='Yes'] 
-    box ['srgb'] = list(zip(box['r']/255, box['g']/255, box['b']/255)) # create one rgb value for conversion
-    rgb = box['srgb'] # create np array of colors
-    lab = [ski.color.rgb2lab(r) for r in rgb]
-
-    return box, lab # return crayola colors in lab color space
+    box['srgb'] = list(zip(box['r']/255, box['g']/255, box['b']/255)) # create one rgb value for conversion
+    return box
 
 
 def segment_image(img): 
@@ -47,10 +44,9 @@ def segment_image(img):
     return img_seg, reg_labels
 
 
-def count_uniq_colors(img_seg): 
+def get_uniq_colors(img_seg): 
     """
-    Given a segmented image (i.e. simplified), identify all unique colors in image and
-    covnert to cielab color space
+    Given a segmented image (i.e. simplified), identify all unique colors in image
     Inputs:
     - img_seg (segmented image)
     Returns:
@@ -59,12 +55,9 @@ def count_uniq_colors(img_seg):
     colors_only = np.vstack(img_seg)
     colors_only_tup = list(map(tuple, colors_only)) 
     uniq_clrs = {x: colors_only_tup.count(x) for x in set(colors_only_tup)}
+    uniq_clrs_srgb = [np.array(x)/255 for x in uniq_clrs.keys()] 
 
-    # convert to lab space
-    uniq_colors_lab = {c: list(ski.color.rgb2lab(c, channel_axis = -1)) for c in uniq_clrs}
-    color_lst = list(uniq_colors_lab.values()) # get just lab colors
-
-    return color_lst
+    return uniq_clrs_srgb
 
 
 def get_crayon_names(crayon_matches, cbox):
@@ -85,6 +78,12 @@ def get_crayon_names(crayon_matches, cbox):
 
     return crayon_info
 
+def calc_delta_E(clr1, clr2):
+    '''
+    Helper function, given 2 colors calculates CIELab Delta E diff
+    '''
+    return ski.color.deltaE_ciede2000(clr1, clr2)
+
 
 def match_colors(clr_lst, cbox):
     """
@@ -96,24 +95,30 @@ def match_colors(clr_lst, cbox):
     Returns:
     - color_matches_rgb (dict), crayons_needed (np.array) - dictionary matching colors to crayon colors, 
     dictionary of crayon crayon colors neeed 
-    """
-    box_df, lab = load_crayola_colors(cbox)
-    # create match of all colors in image and all crayon colors in LAB space
-    color_combos_lst = list(product(clr_lst,lab)) 
-    # calculate cie2000 for colors to find closest crayon color match
-    color_match_lst_dict = [{"c":c[0], "m":c[1], 'cie76':ski.color.deltaE_ciede2000(c[0],c[1])} for c in color_combos_lst] # note: list of dictionaries
+"""
+    # load color list with standardized RGB values 
+    box_df = load_crayola_colors(cbox) 
+    box_srgb = [r for r in box_df['srgb']] # convert to list 
 
-    # for each color, identify color match that minimizes CIE2000, convert to RGB colorspace
-    color_matches_rgb = {}
-    for o in clr_lst:
-        de_values = [c['cie76'] for c in color_match_lst_dict if c['c'] == o]
-        min_diff = min(de_values)
-        best = [c['m'] for c in color_match_lst_dict if c['cie76'] == min_diff]
-        color_matches_rgb[tuple(ski.util.img_as_ubyte(ski.color.lab2rgb(o)))] = tuple(ski.util.img_as_ubyte(ski.color.lab2rgb(best)))
+    # create df with combo of all colors in image and all crayon colors
+    color_combos = pd.DataFrame(list(product(clr_lst,box_srgb)), columns=["img_clr_srgb", "avail_clr_srgb"])
 
-    crayons_needed = get_crayon_names(color_matches_rgb, box_df)
+    # convert colors to LAB space
+    color_combos['img_clr_lab'] = color_combos.apply(lambda x: ski.color.rgb2lab(x['img_clr_srgb']), axis=1)
+    color_combos['avail_clr_lab'] = color_combos.apply(lambda x: ski.color.rgb2lab(x['avail_clr_srgb']), axis=1)
 
-    return color_matches_rgb, crayons_needed
+    # calculate cie2000 for all available colors to fill in image
+    color_combos['delta_e'] = color_combos.apply(lambda x: calc_delta_E(x['img_clr_lab'], x['avail_clr_lab']), axis=1)
+    color_combos['img_clr_id'] = color_combos.apply(lambda x: str(x['img_clr_lab']), axis=1) # necessary, can't hash a list
+
+    # get smallest delta E value for each color in image
+    color_combos = color_combos.iloc[color_combos.groupby('img_clr_id').delta_e.idxmin()].reset_index(drop=True)
+
+    crayons_needed = box_df[box_df['srgb'].isin(color_combos['avail_clr_srgb'])]
+    crayons_needed = crayons_needed[['name']].reset_index(drop=True)
+    crayons_needed['id'] = np.arange(crayons_needed.shape[0])
+
+    return color_combos, crayons_needed
 
 
 # replace image colors with closest crayon colors 
@@ -255,7 +260,7 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
 
     # color identification (in segmented image), match to closest crayon color
     print("matching image colors...\n")
-    img_colors = count_uniq_colors(img_seg) 
+    img_colors = get_uniq_colors(img_seg) 
     img_match_colors, crayons = match_colors(img_colors, cbox = crayon_box)
 
     # replace colors in image with closest crayon color
