@@ -21,7 +21,7 @@ def load_crayola_colors(cbox = 96):
     """
     crayola_box = pd.read_csv('crayola_colors.csv')
     box = crayola_box[['name','r','g','b']][crayola_box[f'box{cbox}'] =='Yes'] 
-    box['srgb'] = list(zip(box['r']/255, box['g']/255, box['b']/255)) # create one rgb value for conversion
+    box['rgb'] = list(zip(box['r'], box['g'], box['b'])) # create singular rgb value
     return box
 
 
@@ -55,9 +55,11 @@ def get_uniq_colors(img_seg):
     colors_only = np.vstack(img_seg)
     colors_only_tup = list(map(tuple, colors_only)) 
     uniq_clrs = {x: colors_only_tup.count(x) for x in set(colors_only_tup)}
-    uniq_clrs_srgb = [np.array(x)/255 for x in uniq_clrs.keys()] 
+    uniq_clrs_df = pd.DataFrame(columns = ["rgb", "srgb"])
+    uniq_clrs_df['rgb'] = pd.Series([np.array(x) for x in uniq_clrs.keys()])
 
-    return uniq_clrs_srgb
+    return uniq_clrs_df
+
 
 def calc_delta_E(clr1, clr2):
     '''
@@ -79,27 +81,28 @@ def match_colors(clr_lst, cbox):
 """
     # load color list with standardized RGB values 
     box_df = load_crayola_colors(cbox) 
-    box_srgb = [r for r in box_df['srgb']] # convert to list 
 
     # create df with combo of all colors in image and all crayon colors
-    color_combos = pd.DataFrame(list(product(clr_lst,box_srgb)), columns=["img_clr_srgb", "avail_clr_srgb"])
+    color_combos = pd.DataFrame(product(list(clr_lst['rgb']),list(box_df['rgb'])), columns=["img_clr_rgb", "avail_clr_rgb"])
 
-    # convert colors to LAB space
-    color_combos['img_clr_lab'] = color_combos.apply(lambda x: ski.color.rgb2lab(x['img_clr_srgb']), axis=1)
-    color_combos['avail_clr_lab'] = color_combos.apply(lambda x: ski.color.rgb2lab(x['avail_clr_srgb']), axis=1)
+    # convert to standardized RGB, convert to CIELAB
+    color_combos['img_clr_lab'] = color_combos.apply(lambda x: ski.color.rgb2lab(x['img_clr_rgb']/255), axis=1)
+    color_combos['avail_clr_lab'] = color_combos.apply(lambda x: ski.color.rgb2lab(np.array(x['avail_clr_rgb'])/255), axis=1)
 
-    # calculate cie2000 for all available colors to fill in image
+    # calculate cie2000 for all available colors for each color in image
     color_combos['delta_e'] = color_combos.apply(lambda x: calc_delta_E(x['img_clr_lab'], x['avail_clr_lab']), axis=1)
     color_combos['img_clr_id'] = color_combos.apply(lambda x: str(x['img_clr_lab']), axis=1) # necessary, can't hash a list
 
     # get smallest delta E value for each color in image
     color_combos = color_combos.iloc[color_combos.groupby('img_clr_id').delta_e.idxmin()].reset_index(drop=True)
+    
+    # join crayon name information to df
+    color_crayons = color_combos.merge(box_df, left_on="avail_clr_rgb", right_on="rgb")
+    color_crayons = color_crayons[['img_clr_rgb','avail_clr_rgb','name']]
+    color_crayons = color_crayons.reset_index(drop=True)
+    color_crayons['id'] = color_crayons.name.factorize()[0]
 
-    crayons_needed = box_df[box_df['srgb'].isin(color_combos['avail_clr_srgb'])]
-    crayons_needed = crayons_needed[['name']].reset_index(drop=True)
-    crayons_needed['id'] = np.arange(crayons_needed.shape[0])
-
-    return color_combos, crayons_needed
+    return color_crayons
 
 
 # replace image colors with closest crayon colors 
@@ -116,9 +119,9 @@ def replace_img_colors(img_seg, color_crayon_match):
     new_img = img_seg.copy()
     # replace the colors! 
     # mask idea https://stackoverflow.com/questions/61808326/how-to-replace-all-rgb-values-in-an-numpy-image-arrray-based-on-an-target-pixel
-    for nc in color_crayon_match.items():   
-        old_color = nc[0]
-        new_color = nc[1]
+    for i, row in color_crayon_match.iterrows():   
+        old_color = row['img_clr_rgb']
+        new_color = row['avail_clr_rgb']
         mask = np.all(new_img == old_color, axis=2)
         new_img[mask, :] = new_color
 
@@ -142,17 +145,17 @@ def identify_region_centers(img_labels):
     return region_centroids
 
 
-def label_regions(img_crayon, img_labels, crayon_info, outpath):
+def label_regions(img_crayon, img_labels, crayon_df, outpath):
     """
     Given a segmented image, write numbers on each region corresponding to its crayon color.
     Inputs:
     - img_crayon: image with crayon colors assinged to segments
     - img_labels: image labels
-    - crayon_info: crayon colors in the image (names of crayons) 
+    - crayon_df: DataFrame with available colors in the image & their names
     - outpath: str, desired outpath for temp image
     Returns:
     - nothing, writes modified image to temporary file in outpath. 
-    """
+"""
     only_labels = ski.segmentation.find_boundaries(img_labels,connectivity = 1)
     only_labels = only_labels*-1
 
@@ -163,12 +166,13 @@ def label_regions(img_crayon, img_labels, crayon_info, outpath):
     crayon_key = {}
     # Display the image on the axes
     plt.figure(figsize=(8, 6), dpi=200)
-    num = region_centers.shape[0]
-    for i in range(0,num):
+    num_regions = region_centers.shape[0]
+    for i in range(0,num_regions):
+        # for each region center, mark with crayon ID number
         tx = region_centers['x'][i]
         ty = region_centers['y'][i]
         tcolor = img_crayon[tx, ty]
-        tlabel = crayon_info.loc[(crayon_info['r'] == tcolor[0]) & (crayon_info['g'] == tcolor[1]) & (crayon_info['b'] == tcolor[2])].color_id.item()
+        tlabel = crayon_df[crayon_df.apply(lambda x: sum(x['avail_clr_rgb']==tcolor), axis=1)>=3].id.unique().item()
         plt.text(ty, tx, tlabel, color='black', va='center', ha='center', size=7)
 
     plt.imshow(temp_img,cmap='gray')
@@ -190,7 +194,7 @@ def save_pbn_image(outpath, name, final_img, key, nbox):
     - nothing, writes modified image to file in outpath. 
     """
     final_img = iio.imread(f'{outpath}/temp.png')
-    key = key[['color_id','name']]
+    key = key[['id','name']].drop_duplicates('name')
 
     # plot image
     plt.figure(figsize=(8,11), dpi=200) # to fit on a 8.5x11 piece of paper
@@ -212,7 +216,7 @@ def save_pbn_image(outpath, name, final_img, key, nbox):
     plt.close() 
 
 
-def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
+def create_pbn(img_path, name, outpath, crayon_box = 96, pre_crayon_save = False):
     """
     Given the filepath to an image, and the number of crayons in crayon box, converts image to a paint-by-numbers
     style crayon drawing.
@@ -220,8 +224,8 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
     - img_path: str, filepath to image
     - name: str, name of image
     - outpath: str, desired outpath for image
-    - crayon_box: int, number of crayons in crayola box
-    - no_crayon: bool, whether or not to save a version of segmeneted image before crayon replacement colors
+    - crayon_box: int, number of crayons in crayola box (16, 24, 48, 64, 96, 120)
+    - pre_crayon_save: bool, whether or not to save a version of segmeneted image before crayon replacement colors
     Returns:
     - nothing, saves final PBN project and result image for reference.
     """
@@ -233,20 +237,20 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
     img_seg, img_labels = segment_image(img)
     # save version of image with no crayon color correction 
 
-    if no_crayon: 
+    if pre_crayon_save: 
         plt.axis('off')
         plt.imshow(img_seg) # show potential results, save for ref
         plt.savefig(f'{outpath}/{name}_pre_crayon.jpeg', bbox_inches='tight')
         plt.close() 
 
-    # color identification (in segmented image), match to closest crayon color
+        # color identification (in segmented image), match to closest crayon color
     print("matching image colors...\n")
     img_colors = get_uniq_colors(img_seg) 
-    img_match_colors, crayons = match_colors(img_colors, cbox = crayon_box)
+    img_crayon_colors_df = match_colors(img_colors, cbox = crayon_box)
 
     # replace colors in image with closest crayon color
     print("replacing image colors with matches...\n")
-    img_crayon = replace_img_colors(img_seg, img_match_colors)
+    img_crayon = replace_img_colors(img_seg, img_crayon_colors_df)
     plt.axis('off')
     plt.imshow(img_crayon) # show potential results, save for ref
     plt.savefig(f'{outpath}/{name}_result.jpeg', bbox_inches='tight')
@@ -254,8 +258,8 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, no_crayon = False):
 
     # label regions in image with new color label
     print("creating labeled version...\n")
-    img_pbn = label_regions(img_crayon, img_labels, crayons, outpath)
+    img_pbn = label_regions(img_crayon, img_labels, img_crayon_colors_df, outpath)
 
     # save image with key to perform
     print("saving output...\n")
-    save_pbn_image(outpath, name, img_pbn, crayons, crayon_box)
+    save_pbn_image(outpath, name, img_pbn, img_crayon_colors_df, crayon_box)
