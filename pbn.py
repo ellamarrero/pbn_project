@@ -1,5 +1,5 @@
-# import necessary libraries
-import os # to get working directory
+# import libraries
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import skimage as ski
@@ -10,52 +10,57 @@ import pandas as pd
 from itertools import combinations, product, chain
 
 
-def load_crayola_colors(cbox = 96): 
+def load_crayola_colors(cbox): 
     """
     Loads in CSV of crayola box colors/RGB values, filters for specific num crayons
-    Note: source of CSV is wikipedia page for crayon colors 
+    Note: source of CSV is wikipedia page for Crayola crayon colors 
     Inputs:
-    - cbox (int) - number of crayons in box (16, 24, 48, 64, 96, 120)
+    - cbox (int): number of crayons in box (16, 24, 48, 64, 96, 120)
     Returns:
-    - tuple (pd.DataFrame, list) - dataframe with color names and RGB vlaues, list of colors cielab space colors
+    - box (pd.DataFrame): df with crayon color names and RGB values
     """
-    crayola_box = pd.read_csv('crayola_colors.csv')
-    box = crayola_box[['name','r','g','b']][crayola_box[f'box{cbox}'] =='Yes'] 
+    crayola_box = pd.read_csv('crayola_colors.csv') # NOTE: if project downloaded, will need to change this 
+    box = crayola_box[['name','r','g','b']][crayola_box[f'box{cbox}'] =='Yes']  # filter to given box num
     box['rgb'] = list(zip(box['r'], box['g'], box['b'])) # create singular rgb value
     return box
 
 
 def segment_image(img): 
     """
-    Given an image, segments using simple linear iterative clustering and joins segments using region 
+    Given an image, segments using simple linear iterative clustering (SLIC) and joins segments using region 
     adjacent graph thresholding. 
     Inputs:
-    - img (image) - image to be segmented 
+    - img (image): image to be segmented 
     Returns:
-    - tuple (segmented image, image segment labels) 
+    - tuple (segmented image, image segment labels)
     """
-    segments_slic = ski.segmentation.slic(img, n_segments=300, compactness=20, sigma=1, start_label=1)
+    # segment image using SLIC to get superpixels in image
+    segments_slic = ski.segmentation.slic(img, n_segments=300, compactness=20, sigma=1, start_label=1) 
     img_slic = ski.color.label2rgb(segments_slic, img, kind='avg', bg_label=None) # specify background color or will average to 0
 
+    # average colors within superpixels to get simplified image
     img_rag = ski.graph.rag_mean_color(img, segments_slic)
     reg_labels = ski.graph.cut_threshold(segments_slic, img_rag,  thresh = 20)
-    img_seg = ski.color.label2rgb(reg_labels, img, kind='avg', bg_label=None) # rag might need padding to deal with edge issue.
+    img_seg = ski.color.label2rgb(reg_labels, img, kind='avg', bg_label=None) 
 
     return img_seg, reg_labels
 
 
 def get_uniq_colors(img_seg): 
     """
-    Given a segmented image (i.e. simplified), identify all unique colors in image
+    Identify all unique colors in an image (note: works best with processed images, e.g. superpixels
+    to minimize number of colors in image)
     Inputs:
-    - img_seg (segmented image)
+    - img_seg (image): note that in this code, image is likely segmented and averaged
     Returns:
-    - color_lst (list of unique cielab colors)
+    - uniq_clrs_df (pd.DataFrame): df where rows are RGB colors in image
     """
-    colors_only = np.vstack(img_seg)
-    colors_only_tup = list(map(tuple, colors_only)) 
+    # get long array of all colors present in image
+    colors_only = np.vstack(img_seg) 
+    colors_only_tup = list(map(tuple, colors_only)) # convert RGB values to tuples to make them unique
+    # get unique colors in image via counting in dict
     uniq_clrs = {x: colors_only_tup.count(x) for x in set(colors_only_tup)}
-    uniq_clrs_df = pd.DataFrame(columns = ["rgb", "srgb"])
+    uniq_clrs_df = pd.DataFrame(columns = ["rgb", "srgb"]) # convert to df
     uniq_clrs_df['rgb'] = pd.Series([np.array(x) for x in uniq_clrs.keys()])
 
     return uniq_clrs_df
@@ -63,7 +68,12 @@ def get_uniq_colors(img_seg):
 
 def calc_delta_E(clr1, clr2):
     '''
-    Helper function, given 2 colors calculates CIELab Delta E diff
+    Helper function, given 2 colors calculates CIELab Delta E
+    Inputs:
+    - clr1 (np.array or set/tuple): RGB color 1 value [R, G, B]
+    - clr2 (np.array or set/tuple): RGB color 2 value [R, G, B]
+    Returns:
+    - (int) - Delta E value
     '''
     return ski.color.deltaE_ciede2000(clr1, clr2)
 
@@ -73,11 +83,12 @@ def match_colors(clr_lst, cbox):
     Get all possible matches of color and crayon color to find closest match using CIE2000 
     color distance calculation
     Inputs:
-    - clr_lst (lst) - list of colors in image
-    - cbox (int) - number of crayons in box (16, 24, 48, 64, 96, 120), default is 96
+    - clr_lst (lst): list of colors in image
+    - cbox (int): number of crayons in box (16, 24, 48, 64, 96, 120)
     Returns:
-    - color_matches_rgb (dict), crayons_needed (np.array) - dictionary matching colors to crayon colors, 
-    dictionary of crayon crayon colors neeed 
+    - color_crayons (pd.DataFrame) - df where each row is a color in simplified image, with crayon
+    name, generated ID, RGB value, standardized RGB value, and CIELAB value. note: will be duplicate
+    colors if differnet image colors are matched with same crayon color
 """
     # load color list with standardized RGB values 
     box_df = load_crayola_colors(cbox) 
@@ -100,24 +111,22 @@ def match_colors(clr_lst, cbox):
     color_crayons = color_combos.merge(box_df, left_on="avail_clr_rgb", right_on="rgb")
     color_crayons = color_crayons[['img_clr_rgb','avail_clr_rgb','name']]
     color_crayons = color_crayons.reset_index(drop=True)
-    color_crayons['id'] = color_crayons.name.factorize()[0]
+    color_crayons['id'] = color_crayons.name.factorize()[0] # generate ID for labelling in image
 
     return color_crayons
 
 
-# replace image colors with closest crayon colors 
 def replace_img_colors(img_seg, color_crayon_match):
     """
-    Given segmented image and list of dicts matching colors in image to new color, replace colors in 
-    image with new colors. 
+    Given segmented image and df with old and new colors in image, replace colors in image. 
     Inputs: 
-    - img_seg (segmented image)
-    - color_crayon_match: dictionary matching colors to crayon colors
+    - img_seg (segmented image): image segmented into superpixels
+    - color_crayon_match (pd.DataFrame): df with image colors and corresponding crayon colors
     Returns:
     - new_img (segmented image): image with colors replaced
     """
     new_img = img_seg.copy()
-    # replace the colors! 
+    # replace the colors in the image! 
     # mask idea https://stackoverflow.com/questions/61808326/how-to-replace-all-rgb-values-in-an-numpy-image-arrray-based-on-an-target-pixel
     for i, row in color_crayon_match.iterrows():   
         old_color = row['img_clr_rgb']
@@ -128,14 +137,13 @@ def replace_img_colors(img_seg, color_crayon_match):
     return new_img
 
 
-# helper function, identifies centroid coordinates of each region
 def identify_region_centers(img_labels):
     """
-    Given image split into regions, determine where center of each region would be.
+    Given image split into regions, calculate center of each region
     Inputs:
     - img_labels (labelled image)
     Returns: 
-    - region-centroids (pd.DataFrame): dataframe with label and coordinates of centroid 
+    - region_centroids (pd.DataFrame): dataframe with label value and coordinates of centroid 
     """
     region_centroids = pd.DataFrame(ski.measure.regionprops_table(img_labels,properties=['centroid']))
     # round down centroids
@@ -147,17 +155,17 @@ def identify_region_centers(img_labels):
 
 def label_regions(img_crayon, img_labels, crayon_df, outpath):
     """
-    Given a segmented image, write numbers on each region corresponding to its crayon color.
+    Given an image, write crayon IDs  on each image segment, save to outpath
     Inputs:
-    - img_crayon: image with crayon colors assinged to segments
-    - img_labels: image labels
-    - crayon_df: DataFrame with available colors in the image & their names
-    - outpath: str, desired outpath for temp image
+    - img_crayon (image): image with crayon colors replacing original colors
+    - img_labels (labelled image): image labels
+    - crayon_df (pd.DataFrame): df with available colors in the image & their names
+    - outpath (str): desired outpath for temp image
     Returns:
     - nothing, writes modified image to temporary file in outpath. 
 """
     only_labels = ski.segmentation.find_boundaries(img_labels,connectivity = 1)
-    only_labels = only_labels*-1
+    only_labels = only_labels*-1 # invert to create outline of image instead of pixels themselves
 
     # get centroids of regions
     region_centers = identify_region_centers(img_labels)
@@ -181,19 +189,19 @@ def label_regions(img_crayon, img_labels, crayon_df, outpath):
     plt.close()
 
 
-def save_pbn_image(outpath, name, final_img, key, nbox):
+def save_pbn_image(outpath, name, key, nbox):
     """
-    Given a segmented image, write numbers on each region corresponding to its crayon color.
+    Given outpath, load temp image created in label_regions, (blank regions labelled with crayon IDs),
+    attach key, and save to outpath.
     Inputs:
-    - outpath: str, desired outpath for image
-    - name: str, name of image
-    - final_img: image labeled with crayon colors
-    - key:  dataframe matching label numbers to crayon names
-    - nbox: number of crayons in box (user-supplied)
+    - outpath (str): desired outpath for image
+    - name (str): name of image (used in image itself and final filepath)
+    - key (pd.DataFrame): dataframe matching label numbers to crayon names
+    - nbox (int): number of crayons in box (16, 24, 48, 64, 96, 120), used in key label
     Returns:
-    - nothing, writes modified image to file in outpath. 
+    - nothing, saves fill-in image with key in outpath. 
     """
-    final_img = iio.imread(f'{outpath}/temp.png')
+    final_img = iio.imread(f'{outpath}/temp.png') # read in labelled image
     key = key[['id','name']].drop_duplicates('name')
 
     # plot image
@@ -225,9 +233,9 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, pre_crayon_save = False
     - name: str, name of image
     - outpath: str, desired outpath for image
     - crayon_box: int, number of crayons in crayola box (16, 24, 48, 64, 96, 120)
-    - pre_crayon_save: bool, whether or not to save a version of segmeneted image before crayon replacement colors
+    - pre_crayon_save: bool, whether or not to save a version of image before crayon replacement colors
     Returns:
-    - nothing, saves final PBN project and result image for reference.
+    - nothing, saves final PBN project and result image for reference at outpath
     """
     # read in image
     img = iio.imread(img_path)
@@ -243,7 +251,7 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, pre_crayon_save = False
         plt.savefig(f'{outpath}/{name}_pre_crayon.jpeg', bbox_inches='tight')
         plt.close() 
 
-        # color identification (in segmented image), match to closest crayon color
+    # color identification (in segmented image), match to closest crayon color
     print("matching image colors...\n")
     img_colors = get_uniq_colors(img_seg) 
     img_crayon_colors_df = match_colors(img_colors, cbox = crayon_box)
