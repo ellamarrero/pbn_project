@@ -270,4 +270,4 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, pre_crayon_save = False
 
     # save image with key to perform
     print("saving output...\n")
-    save_pbn_image(outpath, name, img_pbn, img_crayon_colors_df, crayon_box)
+    save_pbn_image(outpath, name, key = img_crayon_colors_df, nbox=crayon_box)
