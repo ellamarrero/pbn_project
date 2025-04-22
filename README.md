@@ -7,6 +7,19 @@ Create a paint-by-numbers (using Crayola crayons) from any image! The code curre
 ### Background:
 I completed this project as a a fun way to learn about image processing techniques, particularly those used in remote image analysis, e.g. satellite imagery processing. xThroughout the project, I built an understanding of image processing through educational youtube videos (e.g. [What is a convolution? - 3Blue1Brown](https://www.youtube.com/watch?v=KuXjwB4LzSA&pp=ygUQaW1hZ2UgcHJvY2Vzc2luZw%3D%3D)), skimage documentation, and online blogs/forums. 
 
+### Files: 
+
+  * [pbn.py](pbn.py) -- Python script including all functions to generate paint-by-numbers project/result image. 
+
+  * [run_pbn_ex.py](run_pbn_ex.py) -- sample Python code to run function in PBN image (including function input examples). 
+
+  * [crayola_colors.csv](crayola_colors.csv) -- Crayola color names with which box they are included in (e.g. 96, 120), color codes, pulled from Wikipedia in Fall 2024. 
+
+  * [data](data) -- folder for input images (i.e. images you want to change into a PBN project)
+
+  * [output](output) -- folder where output of code is saved (project result, result image, pre-crayon image)
+
+  * [README.md](README.md) -- this file! 
 
 ### Example:
 As an example, it takes an image (like that of my kitten): 
