@@ -243,8 +243,8 @@ def create_pbn(img_path, name, outpath, crayon_box = 96, pre_crayon_save = False
     # given image, segment using SLIC and RAG
     print("segmenting image...\n")
     img_seg, img_labels = segment_image(img)
+    
     # save version of image with no crayon color correction 
-
     if pre_crayon_save: 
         plt.axis('off')
         plt.imshow(img_seg) # show potential results, save for ref
