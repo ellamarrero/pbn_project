@@ -5,7 +5,7 @@ Create a paint-by-numbers (using Crayola crayons) from any image! The code curre
 
 
 ### Background:
-I completed this project as a a fun way to learn about image processing techniques, particularly those used in remote imagery analysis, e.g. satellite imagery processing. Throughout the project, I built an understanding of image processing through educational youtube videos (e.g. [What is a convolution? - 3Blue1Brown](https://www.youtube.com/watch?v=KuXjwB4LzSA&pp=ygUQaW1hZ2UgcHJvY2Vzc2luZw%3D%3D), skimage documentation, and online blogs/forums. 
+I completed this project as a a fun way to learn about image processing techniques, particularly those used in remote imagery analysis, e.g. satellite imagery processing. Throughout the project, I built an understanding of image processing through educational youtube videos (e.g. [What is a convolution? - 3Blue1Brown](https://www.youtube.com/watch?v=KuXjwB4LzSA&pp=ygUQaW1hZ2UgcHJvY2Vzc2luZw%3D%3D)), skimage documentation, and online blogs/forums. 
 
 
 ### Example:
